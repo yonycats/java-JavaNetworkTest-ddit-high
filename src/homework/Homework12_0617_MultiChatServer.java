@@ -1,4 +1,4 @@
-package kr.or.ddit.tcp;
+package homework;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,17 +10,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class MultiChatServer {
+public class Homework12_0617_MultiChatServer {
+
 	
 	public static void main(String[] args) {
-	      new MultiChatServer().serverStart();
+	      new Homework12_0617_MultiChatServer().serverStart();
 	}
 
 	// 대화명 및 클라이언트의 Socket 객체를 저장하기 위한 Map객체변수 선언하기
 	// Map<대화명, 소켓객체> -> 키값으로 대화명 = name을 사용
 	private Map<String, Socket> clients;
 	
-	public MultiChatServer() {
+	public Homework12_0617_MultiChatServer() {
+		// 동기화를 위해 Collections.synchronizedMap(new HashMap<>(); 을 사용
 		clients = Collections.synchronizedMap(new HashMap<String, Socket>());
 	}
 	
@@ -93,15 +95,17 @@ public class MultiChatServer {
 	}
 	
 
-	private void whisperSendMessage(String msg, String name2) {
+	private void whisperSendMessage(String msg, String receiveName, String sendName) {
 			try {
-				String name = name2;
-				
-				// 대화명에 해당하는 Socket 객체를 가져와서 메시지 보내기
+				String name = receiveName;
 				Socket socket = clients.get(name);
-				DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 				
+				msg = msg.replaceAll("/w " + receiveName, "[귓속말] " + "[" + sendName + "]");
+				msg = msg.replaceAll("/W " + receiveName, "[귓속말] " + "[" + sendName + "]");
+				
+				DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 				dos.writeUTF(msg);
+				
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -139,6 +143,7 @@ public class MultiChatServer {
 				// 서버에서는 클라이언트가 보내는 최초의 메시지 즉, 대화명을 수신해야 한다.
 				// 최초의 메시지가 대화명이 가도록 코딩할 것임
 				name = dis.readUTF();
+				name = name.replaceAll(" ", "");
 				
 				// 대화명을 받아서 다른 모든 클라이언트에게 대화방 참여 메세지를 보낸다.
 				sendMessage("#" + name + "님이 입장했습니다");
@@ -151,21 +156,25 @@ public class MultiChatServer {
 				
 				// 이후의 메시지 처리는 채팅 메시지이다.
 				while (dis != null) {
-					sendMessage(dis.readUTF(), name);
+					
+					String chat = dis.readUTF();
+					String[] chatArray = chat.split(" ");
+					
+					if ( chatArray[0].equalsIgnoreCase("/w") ) {
+						whisperSendMessage(chat, chatArray[1], name);
+					} else if ( chat.equalsIgnoreCase("end") ) {
+						System.out.println("채팅방을 나갔습니다.");
+						break;
+					} else {
+						sendMessage(chat, name);						
+					}
 				}
-				
-//				if ( name.substring(0, 2).equals("/w") ) {
-//					whisperSendMessage(dis.readUTF(), name);
-//				} else {
-//					sendMessage(dis.readUTF(), name);
-//				}
-				
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				// 이 finally 영역이 실행된다는 것은 클라이언트의 접속이 종료되었다는 의미이다.
 				// finally에 왔다는 건, 예외(catch)를 거쳐서 왔다는 의미 => 정상적인 실행이 더이상 불가능
-				
 				sendMessage("#" + name + "님이 퇴장했습니다.");
 				
 				// Map에서 해당 사용자 정보 제거하기
@@ -174,7 +183,6 @@ public class MultiChatServer {
 				clients.remove(name);
 				
 				System.out.println("[" + socket.getInetAddress() + ":" + socket.getPort() + "] 에서 접속 종료하였습니다.");
-				
 				System.out.println("현재 서버 접속자 수는 " + clients.size() + "명 입니다.");
 			}
 		}

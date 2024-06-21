@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <input type="button" value="100일후">
+  <input type="button" id="anniv" value="경과된 시간 D+day">
+  <input type="button" id="suryo" value="남은 시간 D-day"> <br><br>
+
+  <input type="date" id="buy">
+  <input type="button" id="refund" value="환불가능확인">
+  <div></div>
+<script>
+  let today = new Date();
+  let todayMs = today.getTime(); //기준일 ~ 오늘까지의 ms
+
+  document.getElementById('refund').addEventListener('click',function(){
+    
+    let v_buyDay = document.querySelector('#buy');
+
+    if(v_buyDay.value == ""){
+      alert("날짜를 선택하슈");      
+      return; //함수 종료
+    } 
+    
+    let buyD = new Date(v_buyDay.value);
+    let buyMs = buyD.getTime();
+    
+    let rst = todayMs - buyMs;
+    let dd = rst/1000/60/60/24;
+    console.log(">>>>>>", dd);
+
+    //7일보다 크면 환불불가, 작으면 가능 알림 띄우기
+    if(dd > 7){
+      alert("환불불가");
+    }else if(dd < 0){
+      alert(today.toLocaleDateString() + "보다 이전 날짜를 선택하세요");
+    }else{
+      alert("환불가능");
+    }
+
+    //날짜 선택기 정보 초기화
+    v_buyDay.value = "";
+
+  });
+
+  document.querySelector('#suryo').addEventListener('click',function(){
+    //수료일
+    let srDay = new Date('2024.11.19')
+    let srMs = srDay.getTime();
+
+    let ms = srMs - todayMs;
+    let dd = ms/1000/60/60/24;
+
+    let result = "수료일 : " + srDay.toLocaleDateString() + "<br>";
+    result += `오늘 날짜 : ${today.toLocaleString()} <br> <br>`;
+    result += `toFixed() D-${dd.toFixed()}일 <br>`;
+    result += `Math.ceil() D-${Math.ceil(dd)}일 <br>`;
+    result += `Math.floor() D-${Math.floor(dd)}일 <br>`;
+    result += `Math.round() D-${Math.round(dd)}일`;
+    // innerHTML속성 - 태그를 포함한 정보를 영역으로 대입 >> 보안적인 문제로 코드거부 가능성 있음
+    // insertAdjacentHTML(위치,정보)
+    document.querySelector('div').insertAdjacentHTML('beforeend',result);
+  });
+  
+  document.querySelector('#anniv').addEventListener('click',function(){
+
+    //오늘까지의 ms
+    //기념일까지의 ms
+    let worldCup = new Date("2002.5.31");
+    let wcMs = worldCup.getTime();
+    
+    let ms = todayMs - wcMs;
+    let sec = ms/1000;
+    let min = sec/60;
+    let hh = min/60;
+    let dd = hh/24;
+    let yy = dd/365;
+
+    //최종 출력 생성
+    let result = "기념일: " + worldCup.toLocaleDateString() + "<br>";
+    result += `오늘 날짜: ${today.toLocaleDateString()} <br>`;
+    result += `${yy.toFixed()}년 경과 또는 `;
+    result += `D-${dd.toFixed()}일 경과 또는 `;
+    result += hh.toFixed() + "시간 경과";
+
+    document.querySelector('div').innerHTML = result;
+  });
+
+  document.querySelector('input').addEventListener('click',function(){
+    
+    //100일 ms
+    let day100Ms = 1000*60*60*24*100; 
+    
+    console.log("오늘로부터 100일 후 >> "
+          , new Date(todayMs + day100Ms).toLocaleString() );
+  });
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</script>
+</body>
+</html>

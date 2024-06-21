@@ -1,4 +1,4 @@
-package kr.or.ddit.tcp;
+package homework;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -7,19 +7,21 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
-public class MultiChatClient {
+public class Homework12_0617_MultiChatClient {
+
 	
 	public static void main(String[] args) throws UnknownHostException, IOException {
-		new MultiChatClient().clientStart();
+		new Homework12_0617_MultiChatClient().clientStart();
 	}
 	
 	
 	public void clientStart() throws UnknownHostException, IOException {
 
 		// 선생님의 IP주소 => 선생님의 컴퓨터가 서버가 되고, 우리가 접속을 함
-		Socket socket = new Socket("192.168.36.131", 7777);
+		Socket socket = new Socket("192.168.36.127", 7777);
 		
 		System.out.println("멀티 챗 서버에 접속되었습니다.");
+		System.out.println("대화명을 입력해주세요.");
 
 		// 송신용 스레드 생성 및 실행
 		ClientSender sender = new ClientSender(socket);
@@ -59,6 +61,9 @@ public class MultiChatClient {
 					// 시작하자마자 자신의 대화명을 서버로 전송한다.
 					System.out.println("대화명 >> ");
 					dos.writeUTF(scan.nextLine());
+					System.out.println("채팅방에 입장하셨습니다.");
+					System.out.println("채팅방을 나가려면 'end'를 입력하고, 귓속말을 하려면 '/w 대화명'을 입력하세요.");
+					System.out.println();
 				}
 				
 				// 다음부터 보내는 메시지는 채팅 메시지
